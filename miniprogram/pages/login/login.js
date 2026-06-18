@@ -30,6 +30,9 @@ Page({
     });
   },
 
+  backHome(){
+    wx.navigateBack()
+  },  
   openPrivacy() {
     wx.navigateTo({
       url: '/pages/privacy/privacy'

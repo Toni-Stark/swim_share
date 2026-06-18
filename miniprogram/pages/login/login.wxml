@@ -3,7 +3,7 @@
     <!-- Logo区域 -->
     <view class="logo-section">
       <image class="logo" src="https://lovebeyonddays.com/common/default-avatar.png" mode="aspectFill"></image>
-      <text class="app-name">小程序</text>
+      <text class="app-name">哔哔浪浪</text>
     </view>
 
     <!-- 介绍文字 -->
@@ -33,5 +33,6 @@
         微信登录
       </button>
     </view>
+    <view class="back_text" catch:tap="backHome">退出登录</view>
   </view>
 </view>
