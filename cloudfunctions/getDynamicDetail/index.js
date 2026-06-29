@@ -71,6 +71,21 @@ exports.main = async (event, context) => {
       commentsCount: commentsCountResult.total
     };
 
+    // 用 users 表里的最新昵称/头像覆盖作者信息（解决改头像后详情不更新）
+    if (dynamic._openid) {
+      const uRes = await db.collection('users')
+        .where({ _openid: dynamic._openid })
+        .get();
+      const u = uRes.data && uRes.data[0];
+      if (u) {
+        dynamic.userInfo = {
+          ...(dynamic.userInfo || {}),
+          nickName: u.nickName || (dynamic.userInfo && dynamic.userInfo.nickName) || '微信用户',
+          avatarUrl: u.avatarUrl || (dynamic.userInfo && dynamic.userInfo.avatarUrl) || ''
+        };
+      }
+    }
+
     return {
       code: 0,
       message: 'success',

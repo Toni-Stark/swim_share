@@ -11,7 +11,7 @@
       item="{{dynamic}}"
       isShow="{{isShow}}"
       youLongShow="{{youLongShow}}"
-      hideActions="{{true}}"
+      hideActions="{{false}}"
       bind:subscribe="onDynamicSubscribe"
       bind:share="onShare">
     </dynamic-item>

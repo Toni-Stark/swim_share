@@ -21,6 +21,8 @@
     "pages/coach-detail/coach-detail",
     "pages/lifeguard-detail/lifeguard-detail",
     "pages/user-profile/user-profile",
+    "pages/competition-edit/competition-edit",
+    "pages/my-competitions/my-competitions",
     "pages/edit-dynamic/edit-dynamic",
     "pages/agreement/agreement",
     "pages/privacy/privacy"

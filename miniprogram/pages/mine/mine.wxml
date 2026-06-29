@@ -81,6 +81,16 @@
       <text class="menu-extra" wx:if="{{monthActiveDays > 0}}">{{monthActiveDays}}天</text>
       <text class="menu-arrow">›</text>
     </view>
+    <view class="menu-card" bindtap="goToMyCompetitions" wx:if="{{isLogin && youLongShow && userInfo.isDiamond}}">
+      <view class="menu-icon icon-comp">🏆</view>
+      <text class="menu-label">预约参赛</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-card" bindtap="goToCompetitions" wx:if="{{isLogin && youLongShow && userInfo.isDiamond}}">
+      <view class="menu-icon icon-race">🏊</view>
+      <text class="menu-label">公开赛</text>
+      <text class="menu-arrow">›</text>
+    </view>
   </view>
 
   <view class="menu-section">

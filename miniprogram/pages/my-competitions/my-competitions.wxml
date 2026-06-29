@@ -1,0 +1,94 @@
+<view class="mycomp-page">
+  <view wx:if="{{youLongShow}}">
+  <view class="page-header">
+    <text class="page-title">🏆 预约参赛</text>
+    <text class="page-sub">你的赛事报名记录</text>
+  </view>
+
+  <view class="loading-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="reg-list" wx:elif="{{registrations.length > 0}}">
+    <view class="reg-card" wx:for="{{registrations}}" wx:key="_id">
+      <view class="reg-card-header" bindtap="goToDetail" data-index="{{index}}">
+        <view class="reg-info">
+          <text class="reg-comp-name">{{item.competitionName || (item.competition.name || '赛事')}}</text>
+          <view class="reg-meta" wx:if="{{item.competition}}">
+            <text class="reg-date">📅 {{item.competition.date}}</text>
+            <text class="reg-loc">📍 {{item.competition.location}}</text>
+          </view>
+        </view>
+        <view class="reg-status-badge {{item.status}}">
+          <text wx:if="{{item.status === 'pending'}}">待审核</text>
+          <text wx:elif="{{item.status === 'approved'}}">已报名</text>
+          <text wx:elif="{{item.status === 'rejected'}}">已驳回</text>
+        </view>
+      </view>
+
+      <block wx:if="{{item.status === 'approved'}}">
+        <view class="cert-section" wx:if="{{item.resultImage || item.resultScore}}">
+          <view class="cert-card">
+            <image wx:if="{{item.resultImage}}" class="cert-image" src="{{item.resultImage}}" mode="aspectFill" />
+            <view class="cert-body" wx:if="{{item.resultScore}}">
+              <view class="cert-badge">🏅</view>
+              <text class="cert-score">{{item.resultScore}}</text>
+              <text class="cert-rank" wx:if="{{item.resultRank}}">{{item.resultRank}}</text>
+              <text class="cert-comp-name">{{item.competitionName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="upload-entry" bindtap="openUpload" data-index="{{index}}">
+          <text class="upload-entry-text">{{item.resultImage || item.resultScore ? '修改成绩' : '上传成绩'}}</text>
+          <text class="upload-entry-arrow">›</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">🏊</text>
+    <text class="empty-text">暂无报名记录</text>
+    <text class="empty-sub">在赛事详情页提交意向即可报名</text>
+  </view>
+
+  <view class="upload-modal" wx:if="{{showUpload}}" catchtouchmove="true">
+    <view class="modal-mask" bindtap="closeUpload"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">上传赛事成绩</text>
+        <text class="modal-close" bindtap="closeUpload">✕</text>
+      </view>
+
+      <view class="modal-body">
+        <view class="upload-image-area" bindtap="chooseResultImage">
+          <image wx:if="{{currentReg.resultImage}}" class="upload-preview" src="{{currentReg.resultImage}}" mode="aspectFill" />
+          <view wx:else class="upload-placeholder">
+            <text class="upload-plus">+</text>
+            <text class="upload-tip">上传比赛照片 (16:9)</text>
+          </view>
+        </view>
+
+        <view class="form-group">
+          <text class="form-label">游泳成绩</text>
+          <input class="form-input" placeholder="如：自由泳 100m 58.32s" value="{{resultScore}}" bindinput="onScoreInput" />
+        </view>
+
+        <view class="form-group">
+          <text class="form-label">名次（选填）</text>
+          <input class="form-input" placeholder="如：第3名" value="{{resultRank}}" bindinput="onRankInput" />
+        </view>
+      </view>
+
+      <button class="modal-save-btn" bindtap="saveResult" disabled="{{uploading}}">
+        {{uploading ? '保存中...' : '保存成绩'}}
+      </button>
+    </view>
+  </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{!youLongShow}}" style="padding-top: 200rpx;">
+    <text class="empty-text">功能暂未开放</text>
+  </view>
+</view>

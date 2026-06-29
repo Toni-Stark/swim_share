@@ -11,8 +11,10 @@ const mac = new qiniu.auth.digest.Mac(AK, SK);
 
 exports.main = async (event, context) => {
   try {
+    const { key } = event || {};
     const options = {
-      scope: BUCKET,
+      scope: key ? `${BUCKET}:${key}` : BUCKET,
+      insertOnly: 0,
       expires: 600,
       returnBody: '{"key":"$(key)","hash":"$(etag)"}'
     };

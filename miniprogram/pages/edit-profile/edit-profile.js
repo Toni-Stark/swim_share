@@ -57,9 +57,11 @@ Page({
 
         wx.showLoading({ title: '上传中...', mask: true });
 
-        request.uploadToQiniu(tempFilePath, 'avatars').then(qiniuUrl => {
+        const openid = wx.getStorageSync('openid');
+        const avatarKey = `avatars/${openid}.jpg`;
+        request.uploadToQiniu(tempFilePath, 'avatars', null, avatarKey).then(qiniuUrl => {
           wx.hideLoading();
-          this.setData({ 'form.avatarUrl': qiniuUrl });
+          this.setData({ 'form.avatarUrl': qiniuUrl + '?v=' + Date.now() });
         }).catch(() => {
           wx.hideLoading();
           request.showToast('头像上传失败');

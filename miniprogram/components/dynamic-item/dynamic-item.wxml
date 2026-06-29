@@ -37,7 +37,7 @@
   <view wx:elif="{{item.displayType === 'video'}}" class="dynamic-video-mode">
     <view class="video-wrapper mt-base" wx:if="{{item.video}}">
       <video class="feed-video" 
-        style="width: 100%;height:56vw;border-radius: 20rpx;" 
+        style="width: 100%;height:50vw;border-radius: 20rpx;" 
         src="{{item.video}}" 
         controls
         show-center-play-btn="{{onList?false:true}}" 

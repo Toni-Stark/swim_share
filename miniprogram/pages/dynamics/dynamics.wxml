@@ -22,6 +22,7 @@
             item="{{item}}"
             isShow="{{isShow}}"
             youLongShow="{{youLongShow}}"
+            hideActions="{{true}}"
             bind:userTap="onUserTap"
             bind:subscribe="onSubscribe"
             bind:comment="onComment"

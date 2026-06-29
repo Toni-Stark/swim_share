@@ -1,0 +1,9 @@
+{
+  "name": "submitCompetitionInterest",
+  "version": "1.0.0",
+  "description": "用户提交赛事意向",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

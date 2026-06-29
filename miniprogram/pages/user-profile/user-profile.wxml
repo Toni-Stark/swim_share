@@ -61,6 +61,7 @@
         <dynamic-item
           item="{{item}}"
           youLongShow="{{youLongShow}}"
+          hideActions="{{true}}"
           bind:subscribe="onSubscribeEvent"
           bind:comment="onComment">
         </dynamic-item>

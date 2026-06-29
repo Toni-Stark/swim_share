@@ -207,7 +207,7 @@
 </view>
 
 <!-- 公开赛入口（已达钻石） -->
-<view class="competition-entry" wx:if="{{competitions.length > 0}}">
+<view class="competition-entry" wx:if="{{competitions.length > 0 && youLongShow}}">
   <view class="comp-entry-card" bindtap="goToCompetitions">
     <view class="comp-entry-left">
       <text class="comp-entry-icon">🏆</text>

@@ -7,6 +7,30 @@ cloud.init({
 
 const db = cloud.database();
 
+// 用 users 表里的最新昵称/头像覆盖列表项的 userInfo（解决改头像后列表不更新）
+async function attachLatestUserInfo(list) {
+  const openids = [...new Set(list.map(i => i._openid).filter(Boolean))];
+  if (openids.length === 0) return list;
+  const _ = db.command;
+  const usersRes = await db.collection('users')
+    .where({ _openid: _.in(openids) })
+    .limit(100)
+    .get();
+  const map = {};
+  usersRes.data.forEach(u => { map[u._openid] = u; });
+  return list.map(item => {
+    const u = map[item._openid];
+    if (u) {
+      item.userInfo = {
+        ...(item.userInfo || {}),
+        nickName: u.nickName || (item.userInfo && item.userInfo.nickName) || '微信用户',
+        avatarUrl: u.avatarUrl || (item.userInfo && item.userInfo.avatarUrl) || ''
+      };
+    }
+    return item;
+  });
+}
+
 // 云函数入口函数
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
@@ -77,11 +101,13 @@ exports.main = async (event, context) => {
       commentsCount: dynamic.commentsCount || 0
     }));
 
+    const finalList = await attachLatestUserInfo(dynamicsWithLikeStatus);
+
     return {
       code: 0,
       message: 'success',
       data: {
-        list: dynamicsWithLikeStatus,
+        list: finalList,
         total: total,
         page: page,
         pageSize: pageSize,

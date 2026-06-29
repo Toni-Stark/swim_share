@@ -1,7 +1,15 @@
 <view class="comp-page">
+  <view wx:if="{{youLongShow}}">
   <view class="comp-header">
     <text class="comp-title">🏆 公开赛</text>
     <text class="comp-sub">赛事报名费由平台提供</text>
+  </view>
+
+  <view class="admin-bar" wx:if="{{isAdmin}}">
+    <view class="admin-create-btn" bindtap="goToCreate">
+      <text class="admin-create-icon">+</text>
+      <text class="admin-create-text">发布赛事</text>
+    </view>
   </view>
 
   <view class="comp-list">
@@ -12,19 +20,37 @@
       data-id="{{item._id}}"
       data-index="{{index}}"
       bindtap="goToDetail">
-      <view class="comp-status {{item.status === 'ended' ? 'ended' : 'upcoming'}}">
-        {{item.status === 'ended' ? '已结束' : '即将开始'}}
+      <view class="comp-card-top">
+        <view class="comp-status {{item.status === 'ended' ? 'ended' : 'upcoming'}}">
+          {{item.status === 'ended' ? '已结束' : '即将开始'}}
+        </view>
+        <view class="comp-reg-status {{item.myRegStatus}}" wx:if="{{item.myRegStatus}}">
+          <text wx:if="{{item.myRegStatus === 'pending'}}">待审核</text>
+          <text wx:elif="{{item.myRegStatus === 'approved'}}">已报名</text>
+          <text wx:elif="{{item.myRegStatus === 'rejected'}}">已驳回</text>
+        </view>
       </view>
       <text class="comp-name">{{item.name}}</text>
       <view class="comp-meta">
         <text class="comp-date">📅 {{item.date}}</text>
         <text class="comp-loc">📍 {{item.location}}</text>
+        <view class="comp-card-bottom">
+          <text class="comp-reg-count">{{item.registrantCount || 0}}人报名</text>
+        </view>
       </view>
-      <text class="comp-arrow">›</text>
+    
+      <view class="admin-actions" wx:if="{{isAdmin}}" catchtap="goToEdit" data-id="{{item._id}}" data-index="{{index}}">
+        <text class="admin-edit-btn">编辑</text>
+      </view>
     </view>
   </view>
 
   <view class="comp-empty" wx:if="{{competitions.length === 0}}">
     <text>暂无公开赛信息</text>
+  </view>
+  </view>
+
+  <view class="comp-empty" wx:if="{{!youLongShow}}" style="padding-top: 200rpx;">
+    <text>功能暂未开放</text>
   </view>
 </view>

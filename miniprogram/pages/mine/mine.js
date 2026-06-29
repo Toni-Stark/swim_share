@@ -120,6 +120,16 @@ Page({
     wx.navigateTo({ url: '/pages/my-likes/my-likes' });
   },
 
+  goToMyCompetitions() {
+    if (!this.data.isLogin) { request.showToast('请先登录'); return; }
+    wx.navigateTo({ url: '/pages/my-competitions/my-competitions' });
+  },
+
+  goToCompetitions() {
+    if (!this.data.isLogin) { request.showToast('请先登录'); return; }
+    wx.navigateTo({ url: '/pages/competitions/competitions' });
+  },
+
   goToSettings() {
     wx.navigateTo({ url: '/pages/settings/settings' });
   },

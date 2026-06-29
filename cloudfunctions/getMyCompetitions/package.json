@@ -1,0 +1,9 @@
+{
+  "name": "getMyCompetitions",
+  "version": "1.0.0",
+  "description": "用户获取自己的赛事报名",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

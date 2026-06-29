@@ -1,0 +1,60 @@
+<view class="edit-page">
+  <view wx:if="{{youLongShow}}">
+  <view class="form-card">
+    <view class="form-title">{{isEdit ? '编辑赛事' : '发布赛事'}}</view>
+
+    <view class="form-item">
+      <text class="form-label">赛事名称</text>
+      <input class="form-input" placeholder="如：2026城市游泳公开赛" value="{{form.name}}" data-field="name" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">比赛日期</text>
+      <picker mode="date" value="{{form.date}}" bindchange="onDateChange">
+        <view class="form-picker {{form.date ? '' : 'placeholder'}}">
+          {{form.date || '请选择日期'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">比赛地点</text>
+      <input class="form-input" placeholder="如：北京国家游泳中心" value="{{form.location}}" data-field="location" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">赛事介绍</text>
+      <textarea class="form-textarea" placeholder="详细介绍赛事信息..." value="{{form.description}}" data-field="description" bindinput="onInput" maxlength="500" auto-height />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">封面图</text>
+      <view class="cover-upload" bindtap="chooseCover">
+        <image wx:if="{{form.coverImage}}" class="cover-preview" src="{{form.coverImage}}" mode="aspectFill" />
+        <view wx:else class="cover-placeholder">
+          <text class="cover-plus">+</text>
+          <text class="cover-tip">上传封面</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">赛事状态</text>
+      <picker range="{{['即将开始', '已结束']}}" value="{{form.status === 'upcoming' ? 0 : 1}}" bindchange="onStatusChange">
+        <view class="form-picker">
+          {{form.status === 'upcoming' ? '即将开始' : '已结束'}}
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="btn-group">
+    <button class="save-btn" bindtap="save" disabled="{{saving}}">{{saving ? '保存中...' : '保存'}}</button>
+    <button wx:if="{{isEdit}}" class="delete-btn" bindtap="deleteCompetition">删除赛事</button>
+  </view>
+  </view>
+
+  <view class="empty-tip" wx:if="{{!youLongShow}}" style="padding-top: 200rpx;">
+    <text>功能暂未开放</text>
+  </view>
+</view>

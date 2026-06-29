@@ -23,6 +23,31 @@
   display: block;
 }
 
+.admin-bar {
+  margin-bottom: 16rpx;
+}
+
+.admin-create-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-radius: 20rpx;
+  padding: 20rpx;
+  font-weight: 600;
+}
+
+.admin-create-icon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.admin-create-text {
+  font-size: 28rpx;
+}
+
 .comp-list {
   display: flex;
   flex-direction: column;
@@ -44,9 +69,14 @@
   transform: scale(0.98);
 }
 
+.comp-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
 .comp-status {
   display: inline-block;
-  align-self: flex-start;
   padding: 4rpx 16rpx;
   border-radius: 16rpx;
   font-size: 22rpx;
@@ -61,6 +91,28 @@
 .comp-status.ended {
   background: #f5f5f5;
   color: #999;
+}
+
+.comp-reg-status {
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.comp-reg-status.pending {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.comp-reg-status.approved {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.comp-reg-status.rejected {
+  background: #fce4ec;
+  color: #c62828;
 }
 
 .comp-name {
@@ -78,15 +130,40 @@
 .comp-loc {
   font-size: 24rpx;
   color: #888;
+  display: flex;
+  align-items: center;
+}
+
+.comp-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.comp-reg-count {
+  font-size: 22rpx;
+  color: #667eea;
+  font-weight: 600;
 }
 
 .comp-arrow {
-  position: absolute;
-  right: 24rpx;
-  top: 50%;
-  transform: translateY(-50%);
   font-size: 36rpx;
   color: #ccc;
+}
+
+.admin-actions {
+  position: absolute;
+  right: 24rpx;
+  top: 24rpx;
+}
+
+.admin-edit-btn {
+  font-size: 24rpx;
+  color: #667eea;
+  padding: 8rpx 20rpx;
+  border: 1px solid #667eea;
+  border-radius: 16rpx;
 }
 
 .comp-empty {

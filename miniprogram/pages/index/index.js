@@ -24,7 +24,7 @@ Page({
       featuredDynamic: {
         title: '2026游泳暑期训练开始报名',
         desc: '专业教练团队，小班教学，一对一指导',
-        image: 'https://lovebeyonddays.com/common/default-avatar.png'
+        image: 'https://lovebeyonddays.com/common/zi_2.png'
       }
     });
   },
@@ -66,7 +66,7 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '游泳教学平台',
+      title: '游泳打卡记录平台-赠送公开赛名额',
       path: '/pages/index/index',
       imageUrl: this.data.featuredDynamic.image
     };

@@ -60,7 +60,8 @@ Page({
     competitions: [],
     bestPaceFormatted: '',
     bestPaceEmoji: '⏱',
-    specialTitle: ''
+    specialTitle: '',
+    youLongShow: 1
   },
 
   onLoad() {
@@ -70,6 +71,7 @@ Page({
       month: now.getMonth() + 1,
       today: now.getDate()
     });
+    this.syncYouLongShow();
     this.loadData();
     this.loadUserStats();
     this.loadEncouragement();
@@ -281,7 +283,7 @@ Page({
 
     const bestStroke = strokeStats[0];
     const tier = getTier(bestStroke.avgSpeed100m, bestStroke.bestPB);
-    const isDiamond = tier && (tier.rank === 'diamond' || tier.rank === 'king');
+    const isDiamond = (tier && (tier.rank === 'diamond' || tier.rank === 'king')) || this.data.specialTitle;
     const userTierInfo = tier ? { stroke: bestStroke, tier: tier.tier, badge: tier.badge } : null;
 
     if (!isDiamond) {
@@ -325,6 +327,18 @@ Page({
   loadEncouragement() {
     const idx = (new Date().getDate() - 1) % encouragements.length;
     this.setData({ encouragement: encouragements[idx] });
+  },
+
+  async syncYouLongShow() {
+    try {
+      const result = await request.callFunction('getGlobalConfig', {
+        key: 'youLongShow'
+      }, { showLoad: false, showError: false });
+      const val = result && result.value !== undefined ? Number(result.value) : 1;
+      this.setData({ youLongShow: val });
+    } catch (e) {
+      this.setData({ youLongShow: 1 });
+    }
   },
 
   goToCompetitions() {

@@ -118,6 +118,7 @@ exports.main = async (event, context) => {
     const bestPaceFormatted = bestPace < Infinity ? formatPace(bestPace) : '';
     const bestPaceEmoji = STROKE_EMOJI[bestPaceStroke] || '⏱';
     const isIronWill = monthDistance > 45000 || monthMaxDistance > 12000;
+    const isDiamond = (bestPace < Infinity && bestPace > 0 && bestPace <= 80) || isIronWill;
 
     return {
       code: 0,
@@ -134,6 +135,7 @@ exports.main = async (event, context) => {
         bestPaceEmoji,
         bestPaceStroke,
         isIronWill,
+        isDiamond,
         monthMaxDistance
       }
     };
@@ -149,7 +151,8 @@ exports.main = async (event, context) => {
         monthDistance: 0,
         monthActiveDays: 0,
         todayDistance: 0,
-        todayChecked: false
+        todayChecked: false,
+        isDiamond: false
       }
     };
   }

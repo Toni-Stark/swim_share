@@ -244,14 +244,12 @@ async function processDynamicsImages(dynamics) {
 
   const processedDynamics = dynamics.map(item => {
     const newItem = { ...item };
-    if (newItem.userInfo && newItem.userInfo.avatarUrl) {
-      const avatar = newItem.userInfo.avatarUrl;
-      if (avatar && avatar.startsWith('cloud://')) {
-        newItem.userInfo = {
-          ...newItem.userInfo,
-          avatarUrl: QINIU_BASE + '/common/default-avatar.png'
-        };
-      }
+    if (newItem._openid) {
+      const existingAvatar = newItem.userInfo && newItem.userInfo.avatarUrl;
+      newItem.userInfo = {
+        ...newItem.userInfo,
+        avatarUrl: existingAvatar || (QINIU_BASE + '/avatars/' + newItem._openid + '.jpg')
+      };
     }
     return newItem;
   });
@@ -259,16 +257,16 @@ async function processDynamicsImages(dynamics) {
   return processedDynamics;
 }
 
-async function uploadToQiniu(filePath, folder = 'dynamics', onProgress) {
+async function uploadToQiniu(filePath, folder = 'dynamics', onProgress, customKey) {
   try {
-    const tokenRes = await callFunction('getQiniuToken', {}, {
+    const ext = filePath.split('.').pop() || 'jpg';
+    const key = customKey || `${folder}/${Date.now()}_${Math.floor(Math.random() * 10000)}.${ext}`;
+
+    const tokenRes = await callFunction('getQiniuToken', { key }, {
       showLoad: false,
       showError: false
     });
     const token = tokenRes.token;
-
-    const ext = filePath.split('.').pop() || 'jpg';
-    const key = `${folder}/${Date.now()}_${Math.floor(Math.random() * 10000)}.${ext}`;
 
     return new Promise((resolve, reject) => {
       const uploadTask = wx.uploadFile({
@@ -278,16 +276,22 @@ async function uploadToQiniu(filePath, folder = 'dynamics', onProgress) {
         formData: { token, key },
         timeout: 600000,
         success(res) {
+          console.log('[uploadToQiniu] statusCode:', res.statusCode);
+          console.log('[uploadToQiniu] raw data:', res.data);
+          let data;
           try {
-            console.log('[uploadToQiniu] statusCode:', res.statusCode);
-            console.log('[uploadToQiniu] raw data:', res.data);
-            const data = JSON.parse(res.data);
-            const resultKey = data.key || key;
-            console.log('[uploadToQiniu] key:', resultKey);
-            resolve(`${QINIU_BASE}/${resultKey}`);
+            data = JSON.parse(res.data);
           } catch (parseErr) {
             console.error('[uploadToQiniu] parse failed:', parseErr, 'raw:', res.data);
-            resolve(`${QINIU_BASE}/${key}`);
+            reject(new Error('上传响应解析失败'));
+            return;
+          }
+          if (res.statusCode === 200 && data && data.key) {
+            console.log('[uploadToQiniu] key:', data.key);
+            resolve(`${QINIU_BASE}/${data.key}`);
+          } else {
+            console.error('[uploadToQiniu] upload rejected:', res.statusCode, data);
+            reject(new Error((data && data.error) || ('上传失败:' + res.statusCode)));
           }
         },
         fail(err) {

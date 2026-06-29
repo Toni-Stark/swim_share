@@ -7,6 +7,76 @@ cloud.init({
 const db = cloud.database();
 const _ = db.command;
 
+// 计算用户是否达到钻石段位（全历史最佳配速 ≤ 80s/100m，或当月毅力之星）
+async function computeIsDiamond(openid) {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+
+  const allResult = await db.collection('check_ins')
+    .where({ _openid: openid })
+    .limit(1000)
+    .get();
+
+  const dateMap = {};
+  allResult.data.forEach(item => {
+    let dateKey;
+    if (typeof item.date === 'string') {
+      dateKey = item.date;
+    } else if (item.date) {
+      const d = new Date(item.date);
+      dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    if (!dateKey) return;
+    const existing = dateMap[dateKey];
+    if (!existing || (item.updateTime && existing.updateTime && item.updateTime > existing.updateTime)) {
+      dateMap[dateKey] = item;
+    } else if (!existing.distance && item.distance) {
+      dateMap[dateKey] = item;
+    }
+  });
+
+  let bestPace = Infinity;
+  let monthDistance = 0;
+  let monthMaxDistance = 0;
+
+  Object.values(dateMap).forEach(item => {
+    const dist = Number(item.distance) || 0;
+    const dur = Number(item.duration) || 0;
+
+    let itemMonth;
+    if (typeof item.date === 'string') {
+      itemMonth = parseInt(item.date.split('-')[1], 10);
+    } else if (item.date) {
+      itemMonth = new Date(item.date).getMonth() + 1;
+    }
+
+    if (itemMonth === month) {
+      if (dist > 0) monthDistance += dist;
+      if (dist > monthMaxDistance) monthMaxDistance = dist;
+    }
+
+    if (dist > 0 && dur > 0) {
+      const pace = dur / (dist / 100);
+      if (pace < bestPace) bestPace = pace;
+    }
+  });
+
+  const isIronWill = monthDistance > 45000 || monthMaxDistance > 12000;
+  return (bestPace < Infinity && bestPace > 0 && bestPace <= 80) || isIronWill;
+}
+
+// 重新计算并写回 users.isDiamond（失败不影响打卡主流程）
+async function refreshUserDiamond(openid) {
+  try {
+    const isDiamond = await computeIsDiamond(openid);
+    await db.collection('users')
+      .where({ _openid: openid })
+      .update({ data: { isDiamond } });
+  } catch (e) {
+    console.warn('[checkIn] 更新 isDiamond 失败:', e);
+  }
+}
+
 function pad(n) {
   return String(n).padStart(2, '0');
 }
@@ -50,6 +120,7 @@ exports.main = async (event, context) => {
       if (stroke !== undefined) updateData.stroke = stroke;
       await db.collection('check_ins').doc(record._id).update({ data: updateData });
       console.log('[checkIn] 更新完成 (字符串匹配)');
+      await refreshUserDiamond(wxContext.OPENID);
       return {
         code: 0,
         message: '已更新',
@@ -89,6 +160,7 @@ exports.main = async (event, context) => {
       if (stroke !== undefined) updateData.stroke = stroke;
       await db.collection('check_ins').doc(record._id).update({ data: updateData });
       console.log('[checkIn] 更新并迁移完成 (Date → String)');
+      await refreshUserDiamond(wxContext.OPENID);
       return {
         code: 0,
         message: '已更新',
@@ -116,6 +188,8 @@ exports.main = async (event, context) => {
     console.log('[checkIn] 新增记录');
     const result = await db.collection('check_ins').add({ data: addData });
     console.log('[checkIn] 新增完成', result._id);
+
+    await refreshUserDiamond(wxContext.OPENID);
 
     return {
       code: 0,

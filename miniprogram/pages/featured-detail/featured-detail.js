@@ -97,15 +97,15 @@ Page({
     const mediaList = [
       {
         type: 'image',
-        url: 'https://lovebeyonddays.com/common/default-avatar.png'
+        url: 'https://lovebeyonddays.com/common/zi_2.png'
       },
       {
         type: 'image',
-        url: 'https://lovebeyonddays.com/common/default-avatar.png'
+        url: 'https://lovebeyonddays.com/common/die_2.png'
       },
       {
         type: 'video',
-        url: 'https://lovebeyonddays.com/videos/sample.mp4'
+        url: 'https://lovebeyonddays.com/common/video3.mp4'
       }
     ];
 
