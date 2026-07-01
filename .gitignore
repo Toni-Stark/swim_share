@@ -30,3 +30,8 @@ miniprogram/**/*.wxss
 
 # 私密配置
 project.private.config.json
+admin/server/.env
+admin/server/logs/
+
+# 管理后台前端构建产物
+admin/web/dist/
