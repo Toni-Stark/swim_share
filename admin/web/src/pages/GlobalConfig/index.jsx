@@ -1,75 +1,180 @@
 import { useState, useEffect } from 'react';
-import { Card, Table, Input, Button, Space, message, Tag } from 'antd';
-import { SaveOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Card, Switch, Typography, Row, Col, List, Avatar, Tag, Popconfirm, Button, Space, Empty } from 'antd';
+import { SettingOutlined, TeamOutlined, UserDeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import configApi from '../../api/config';
+import usersApi from '../../api/users';
+import { useNavigate } from 'react-router-dom';
+
+const { Title, Text } = Typography;
 
 export default function GlobalConfig() {
-  const [configs, setConfigs] = useState([]);
-  const [editingValues, setEditingValues] = useState({});
+  const [youLongShow, setYouLongShow] = useState(1);
+  const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetch = () => {
-    configApi.getConfigs().then(res => {
-      if (res.code === 0) {
-        setConfigs(res.data);
-        const map = {};
-        res.data.forEach(c => { map[c._id || c.key] = c.value; });
-        setEditingValues(map);
+    setLoading(true);
+    Promise.all([
+      configApi.getConfigs(),
+      usersApi.getUsers({ pageSize: 500 })
+    ]).then(([confRes, userRes]) => {
+      if (confRes.code === 0) {
+        confRes.data.forEach(c => {
+          if (c._id === 'youLongShow' || c.key === 'youLongShow') {
+            setYouLongShow(Number(c.value) || 0);
+          }
+        });
       }
-    });
+      if (userRes.code === 0) {
+        const adminList = (userRes.data.list || []).filter(u => u.role === 'admin');
+        setAdmins(adminList);
+      }
+    }).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetch(); }, []);
 
-  const save = (key) => {
-    const value = editingValues[key];
-    configApi.updateConfig(key, value).then(res => {
-      if (res.code === 0) { message.success('已保存'); fetch(); }
-      else message.error(res.message);
+  const toggleYouLong = (checked) => {
+    const val = checked ? 1 : 0;
+    setYouLongShow(val);
+    configApi.updateConfig('youLongShow', val).then(res => {
+      if (res.code !== 0) setYouLongShow(checked ? 0 : 1);
     });
   };
 
-  const renderValue = (key, val) => {
-    if (key === 'youLongShow') {
-      return (
-        <Tag color={val ? 'green' : 'red'} style={{ cursor: 'pointer' }}
-          onClick={() => {
-            const nv = val === 1 ? 0 : 1;
-            configApi.updateConfig(key, nv).then(res => {
-              if (res.code === 0) { message.success('已切换'); fetch(); }
-            });
-          }}>
-          {val === 1 ? '已开启' : '已关闭'}
-        </Tag>
-      );
-    }
-    if (typeof val === 'string' && (key === 'adminOpenIds')) {
-      return <Input.TextArea value={editingValues[key]} onChange={e => setEditingValues({ ...editingValues, [key]: e.target.value })} rows={3} />;
-    }
-    return <Input value={editingValues[key] || ''} onChange={e => setEditingValues({ ...editingValues, [key]: e.target.value })} />;
+  const removeAdmin = (openid) => {
+    usersApi.updateUser(openid, { role: 'user' }).then(res => {
+      if (res.code === 0) fetch();
+    });
   };
 
   return (
-    <Card title="全局配置" extra={<Button icon={<ReloadOutlined />} onClick={fetch}>刷新</Button>}>
-      <Table rowKey="_id" dataSource={configs} pagination={false} columns={[
-        { title: '配置键', dataIndex: '_id', width: 200, render: (v, r) => r._id || r.key },
-        { title: '当前值', width: 300, render: (_, r) => {
-          const key = r._id || r.key;
-          const val = r.value;
-          if (typeof val === 'boolean' || (key === 'youLongShow' && (val === 1 || val === 0))) {
-            const v = val === 1 || val === true;
-            return <Tag color={v ? 'green' : 'red'}>{v ? '开启' : '关闭'}</Tag>;
-          }
-          return <span>{typeof val === 'object' ? JSON.stringify(val) : String(val)}</span>;
-        }},
-        { title: '新值', render: (_, r) => renderValue(r._id || r.key, r.value) },
-        {
-          title: '操作', width: 100, render: (_, r) => {
-            const key = r._id || r.key;
-            if (key === 'youLongShow') return null;
-            return <Button type="primary" size="small" icon={<SaveOutlined />} onClick={() => save(key)}>保存</Button>;
-          }
-        }
-      ]} />
-    </Card>
+    <div>
+      <Title level={4} style={{ marginBottom: 24 }}>全局配置</Title>
+
+      <Row gutter={[16, 16]}>
+        {/* youLongShow 开关 */}
+        <Col xs={24} md={8}>
+          <Card
+            loading={loading}
+            style={{
+              borderRadius: 12,
+              borderTop: '3px solid #1677ff'
+            }}
+          >
+            <Space align="start" size={16}>
+              <SettingOutlined style={{ fontSize: 32, color: '#1677ff' }} />
+              <div style={{ flex: 1 }}>
+                <Text strong style={{ fontSize: 16 }}>游龙功能开关</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Switch
+                    checked={youLongShow === 1}
+                    onChange={toggleYouLong}
+                    style={{ marginBottom: 8 }}
+                  />
+                </div>
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  控制小程序端游龙功能（信息流、发布动态等）的全局显隐。
+                  关闭后用户将看到「功能暂未开放」。
+                </Text>
+              </div>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col xs={24} md={8}>
+          <Card
+            loading={loading}
+            style={{
+              borderRadius: 12,
+              borderTop: '3px solid #52c41a'
+            }}
+          >
+            <Space align="start" size={16}>
+              <TeamOutlined style={{ fontSize: 32, color: '#52c41a' }} />
+              <div style={{ flex: 1 }}>
+                <Text strong style={{ fontSize: 16 }}>管理员列表</Text>
+                <div style={{ marginTop: 12 }}>
+                  <Tag color="green" style={{ fontSize: 13, marginBottom: 8 }}>{admins.length} 位管理员</Tag>
+                </div>
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  管理员可以发布赛事、审核报名。
+                  前往「用户管理」页变更用户角色。
+                </Text>
+              </div>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col xs={24} md={8}>
+          <Card
+            loading={loading}
+            style={{
+              borderRadius: 12,
+              borderTop: '3px solid #722ed1',
+              background: 'linear-gradient(180deg, #f9f0ff 0%, #fff 100%)'
+            }}
+          >
+            <Space align="start" size={16}>
+              <div style={{ fontSize: 32 }}>🏊</div>
+              <div style={{ flex: 1 }}>
+                <Text strong style={{ fontSize: 16 }}>钻石段位</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Text style={{ fontSize: 13, color: '#666' }}>
+                    全历史最佳配速 ≤ 80s/100m 或当月毅力之星自动判定。
+                    可在「段位分析」页查看分布。
+                  </Text>
+                </div>
+              </div>
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* 管理员列表 */}
+      <Card
+        title={<Space><TeamOutlined />管理员用户</Space>}
+        extra={<Button icon={<ReloadOutlined />} onClick={fetch} size="small">刷新</Button>}
+        style={{ marginTop: 16, borderRadius: 12 }}
+        loading={loading}
+      >
+        {admins.length > 0 ? (
+          <List
+            dataSource={admins}
+            renderItem={(item) => (
+              <List.Item
+                actions={[
+                  <Button
+                    key="edit"
+                    size="small"
+                    onClick={() => navigate('/users')}
+                  >
+                    前往编辑
+                  </Button>,
+                  <Popconfirm
+                    key="remove"
+                    title="确定移除此用户的管理员角色？"
+                    onConfirm={() => removeAdmin(item._openid)}
+                  >
+                    <Button size="small" danger icon={<UserDeleteOutlined />}>移除</Button>
+                  </Popconfirm>
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={
+                    <Avatar src={item.avatarUrl || 'https://lovebeyonddays.com/common/default-avatar.png'} size={40} />
+                  }
+                  title={item.nickName || '未知用户'}
+                  description={item._openid}
+                />
+              </List.Item>
+            )}
+          />
+        ) : (
+          <Empty description="暂无管理员，请在用户管理页设置" />
+        )}
+      </Card>
+    </div>
   );
 }

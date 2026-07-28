@@ -1,0 +1,111 @@
+<view class="honors-page">
+  <view class="top-bar">
+    <view class="top-left">
+      <text class="top-icon">🏆</text>
+      <text class="top-title">荣誉勋章墙</text>
+    </view>
+    <view class="top-save-status">
+      <text wx:if="{{saving}}">保存中...</text>
+      <text wx:elif="{{saved}}" style="color:#52c41a">✓ 已保存</text>
+    </view>
+  </view>
+
+  <view class="apply-bar" bindtap="showApply">
+    <text class="apply-icon">📩</text>
+    <text class="apply-text">联系管理员微信申请荣誉勋章</text>
+    <text class="apply-arrow">›</text>
+  </view>
+
+  <!-- 墙面 -->
+  <movable-area class="wall-area" scale-area="{{false}}" style="height:{{wallHeight}}px">
+    <movable-view
+      wx:for="{{wallHonors}}"
+      wx:key="_id"
+      class="wall-card"
+      direction="all"
+      x="{{item.x || 0}}"
+      y="{{item.y || 0}}"
+      inertia="{{true}}"
+      damping="{{20}}"
+      data-id="{{item._id}}"
+      bindtouchstart="onTouchStart"
+      bindtouchend="onTouchEnd"
+      bindchange="onWallChange"
+      bindlongpress="onWallLongPress"
+    >
+      <!-- 翻面卡片 -->
+      <view class="flip-card {{item.flipped ? 'flipped' : ''}}" data-id="{{item._id}}">
+        <view class="flip-inner">
+          <!-- 正面：奖牌 -->
+          <view class="flip-front flip-front-{{item.level || 'primary'}}">
+            <image wx:if="{{shells[item.level]}}" class="front-shell" src="{{shells[item.level]}}" mode="aspectFit" />
+            <image wx:if="{{item.imageUrl}}" class="front-medal" src="{{item.imageUrl}}" mode="aspectFit" />
+            <text wx:if="{{!item.imageUrl}}" class="front-fallback">{{item.icon || '🏅'}}</text>
+            <text class="front-name">{{item.name}}</text>
+            <text class="front-tap">轻点翻面</text>
+          </view>
+          <!-- 背面：详情 -->
+          <view class="flip-back">
+            <text class="back-name">{{item.name}}</text>
+            <view class="back-divider"></view>
+            <text class="back-label">获得方式</text>
+            <text class="back-process">{{item.process || '管理员颁发'}}</text>
+            <text class="back-label">获得时间</text>
+            <text class="back-date">{{item.achievedAt || '-'}}</text>
+            <text class="back-tap">轻点翻回</text>
+          </view>
+        </view>
+      </view>
+    </movable-view>
+  </movable-area>
+
+  <!-- 分割线 -->
+  <view class="divider-row">
+    <view class="divider-line"></view>
+    <view class="divider-label">
+      <text>📦 勋章仓库</text>
+      <text class="divider-hint">（轻点放到墙上）</text>
+    </view>
+    <view class="divider-line"></view>
+  </view>
+
+  <!-- 仓库 -->
+  <view class="chest-area" wx:if="{{chestHonors.length > 0}}">
+    <scroll-view scroll-x class="chest-scroll">
+      <view class="chest-row">
+        <view
+          class="chest-card"
+          wx:for="{{chestHonors}}"
+          wx:key="_id"
+          data-honor="{{item}}"
+          bindtap="onChestTap"
+        >
+          <view class="chest-hex" style="border-color:{{item.level === 'top' ? '#faad14' : item.level === 'intermediate' ? '#1890ff' : '#52c41a'}}">
+            <image wx:if="{{item.imageUrl}}" class="chest-hex-img" src="{{item.imageUrl}}" mode="aspectFit" />
+            <text wx:else class="chest-icon">{{item.icon || '🏅'}}</text>
+          </view>
+          <text class="chest-name">{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="chest-empty" wx:else>
+    <text class="empty-text">暂无未放置的勋章</text>
+  </view>
+
+  <view class="apply-modal" wx:if="{{showApplyModal}}" catchtap="hideApply">
+    <view class="apply-modal-content" catchtap="">
+      <text class="modal-title">📩 申请荣誉勋章</text>
+      <text class="modal-desc">如果你认为已达到某项荣誉的获取条件，请联系管理员微信进行审核颁发。</text>
+      <view class="modal-card" catchtap="copyWechat">
+        <view class="modal-wechat-row">
+          <text class="modal-wechat-icon">💬</text>
+          <text class="modal-wechat">lllh2033</text>
+        </view>
+        <text class="modal-copy-tip">点击复制微信号</text>
+      </view>
+      <button class="modal-close" bindtap="hideApply">知道了</button>
+    </view>
+  </view>
+</view>

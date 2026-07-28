@@ -75,6 +75,11 @@
       <text class="menu-label">管理订阅</text>
       <text class="menu-arrow">›</text>
     </view>
+    <view class="menu-card" bindtap="goToHonorWall">
+      <view class="menu-icon icon-honor">🏆</view>
+      <text class="menu-label">荣誉勋章</text>
+      <text class="menu-arrow">›</text>
+    </view>
     <view class="menu-card" bindtap="goToSwimRecords" wx:if="{{youLongShow}}">
       <view class="menu-icon icon-records">📊</view>
       <text class="menu-label">游龙纪录</text>

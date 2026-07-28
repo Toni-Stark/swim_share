@@ -5,6 +5,7 @@ Page({
     competition: null,
     competitionId: '',
     isAdmin: false,
+    isCreator: false,
     myRegStatus: '',
     registrations: [],
     showPhoneModal: false,
@@ -29,6 +30,7 @@ Page({
         this.setData({
           competition: item,
           isAdmin: listPage.data.isAdmin || false,
+          isCreator: item.isCreator || false,
           myRegStatus: item.myRegStatus || ''
         });
       }
@@ -38,13 +40,13 @@ Page({
       this.loadCompetition(id);
     }
 
-    if (this.data.isAdmin) {
+    if (this.data.isAdmin || this.data.isCreator) {
       this.loadRegistrations(id);
     }
   },
 
   onShow() {
-    if (this.data.isAdmin && this.data.competitionId) {
+    if ((this.data.isAdmin || this.data.isCreator) && this.data.competitionId) {
       this.loadRegistrations(this.data.competitionId);
     }
   },
@@ -70,9 +72,10 @@ Page({
         this.setData({
           competition: item,
           isAdmin: result?.isAdmin || false,
+          isCreator: item.isCreator || false,
           myRegStatus: item.myRegStatus || ''
         });
-        if (result?.isAdmin) this.loadRegistrations(id);
+        if (result?.isAdmin || item.isCreator) this.loadRegistrations(id);
       }
     } catch (e) {
       console.warn('加载赛事失败:', e);

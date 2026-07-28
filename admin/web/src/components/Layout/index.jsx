@@ -26,6 +26,7 @@ const menuItems = [
   { key: '/checkins', icon: <ScheduleOutlined />, label: '打卡记录' },
   { key: '/content', icon: <ControlOutlined />, label: '内容管理' },
   { key: '/tiers', icon: <TrophyOutlined />, label: '段位分析' },
+  { key: '/honors', icon: <TrophyOutlined />, label: '荣誉管理' },
   { key: '/config', icon: <SettingOutlined />, label: '全局配置' }
 ];
 

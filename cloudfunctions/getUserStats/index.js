@@ -58,6 +58,14 @@ exports.main = async (event, context) => {
     let monthMaxDistance = 0;
     let monthActiveDaysCount = 0;
 
+    // 按泳姿记录全历史最佳配速
+    const bestPacePerStroke = {
+      freestyle: Infinity,
+      breaststroke: Infinity,
+      backstroke: Infinity,
+      butterfly: Infinity
+    };
+
     const STROKE_EMOJI = {
       freestyle: '🏊',
       breaststroke: '🐸',
@@ -112,6 +120,11 @@ exports.main = async (event, context) => {
           bestPace = pace;
           bestPaceStroke = item.stroke || '';
         }
+        // 按泳姿记录全历史最佳
+        const s = item.stroke;
+        if (s && bestPacePerStroke[s] !== undefined && pace < bestPacePerStroke[s]) {
+          bestPacePerStroke[s] = pace;
+        }
       }
     });
 
@@ -119,6 +132,13 @@ exports.main = async (event, context) => {
     const bestPaceEmoji = STROKE_EMOJI[bestPaceStroke] || '⏱';
     const isIronWill = monthDistance > 45000 || monthMaxDistance > 12000;
     const isDiamond = (bestPace < Infinity && bestPace > 0 && bestPace <= 80) || isIronWill;
+
+    // 泳姿最佳配速（Infinity → null，四舍五入）
+    const strokeBestObj = {};
+    for (const key of Object.keys(bestPacePerStroke)) {
+      const v = bestPacePerStroke[key];
+      strokeBestObj[key] = v < Infinity ? Math.round(v * 10) / 10 : null;
+    }
 
     return {
       code: 0,
@@ -136,6 +156,7 @@ exports.main = async (event, context) => {
         bestPaceStroke,
         isIronWill,
         isDiamond,
+        bestPacePerStroke: strokeBestObj,
         monthMaxDistance
       }
     };

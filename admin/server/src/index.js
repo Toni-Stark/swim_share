@@ -15,6 +15,8 @@ const checkinsRoutes = require('./routes/checkins');
 const contentRoutes = require('./routes/content');
 const tierRoutes = require('./routes/tier');
 const configRoutes = require('./routes/config');
+const uploadRoutes = require('./routes/upload');
+const honorsRoutes = require('./routes/honors');
 
 const app = express();
 
@@ -34,6 +36,8 @@ app.use('/api/checkins', checkinsRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/tiers', tierRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/honors', honorsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });

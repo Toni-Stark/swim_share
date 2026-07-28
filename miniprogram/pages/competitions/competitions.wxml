@@ -39,7 +39,7 @@
         </view>
       </view>
     
-      <view class="admin-actions" wx:if="{{isAdmin}}" catchtap="goToEdit" data-id="{{item._id}}" data-index="{{index}}">
+      <view class="admin-actions" wx:if="{{isAdmin || item.isCreator}}" catchtap="goToEdit" data-id="{{item._id}}" data-index="{{index}}">
         <text class="admin-edit-btn">编辑</text>
       </view>
     </view>

@@ -1,20 +1,27 @@
 <view class="ad-card {{item.cardType === 'competition' ? 'competition' : ''}}">
   <view class="ac-tag-row">
     <view class="ac-tag {{item.cardType === 'competition' ? 'tag-comp' : 'tag-ad'}}">
-      <text>{{item.cardType === 'competition' ? '🏆 赛事' : '💼 推荐'}}</text>
+      <text>{{item.cardType === 'competition' ? '🏆 公开赛' : '💼 推荐'}}</text>
     </view>
-    <text class="ac-time">{{item.createTime}}</text>
+    <text class="ac-time">{{item.date || item.createTime}}</text>
   </view>
+
+  <image wx:if="{{item.coverUrl}}" class="ac-cover" src="{{item.coverUrl}}" mode="aspectFill" />
 
   <text class="ac-title">{{item.title}}</text>
   <text class="ac-desc">{{item.description}}</text>
+
+  <view class="ac-meta" wx:if="{{item.cardType === 'competition'}}">
+    <text class="ac-meta-item">📍 {{item.location}}</text>
+    <text class="ac-meta-item">👥 {{item.registrantCount || 0}}人报名</text>
+  </view>
 
   <view class="ac-tags" wx:if="{{item.tags && item.tags.length > 0}}">
     <text class="ac-tag-item" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
   </view>
 
   <view class="ac-action">
-    <text class="ac-action-text">查看详情</text>
+    <text class="ac-action-text">{{item.cardType === 'competition' ? '查看赛事' : '查看详情'}}</text>
     <button class="ac-share-btn" open-type="share" catchtap="onShare">
       <text class="ac-share-icon">↗</text>
     </button>

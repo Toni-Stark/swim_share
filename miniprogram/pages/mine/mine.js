@@ -106,6 +106,11 @@ Page({
     wx.navigateTo({ url: '/pages/edit-profile/edit-profile' });
   },
 
+  goToHonorWall() {
+    if (!this.data.isLogin) { request.showToast('请先登录'); return; }
+    wx.navigateTo({ url: '/pages/honors-wall/honors-wall' });
+  },
+
   goToSwimRecords() {
     wx.navigateTo({ url: '/pages/swim-records/swim-records' });
   },

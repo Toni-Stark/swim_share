@@ -2,24 +2,23 @@ const request = require('../../utils/request.js');
 const encouragements = require('../../data/encouragements.js');
 const strokesData = require('../../data/strokes.js');
 
-const AVG_TIERS = [
-  { maxSpeed: 120, minSpeed: 0,   tier: '铂金泳者', badge: '💎', rank: 'platinum' },
-  { maxSpeed: 150, minSpeed: 120, tier: '黄金泳者', badge: '🥇', rank: 'gold' },
-  { maxSpeed: 180, minSpeed: 150, tier: '白银泳者', badge: '🥈', rank: 'silver' },
-  { maxSpeed: 999, minSpeed: 180, tier: '青铜泳者', badge: '🥉', rank: 'bronze' },
+// 8 级段位：按全历史最佳配速判定
+const ALL_TIERS = [
+  { maxSpeed: 50,  minSpeed: 0,   tier: '荣耀王者', badge: '👑', rank: 'king_glory' },
+  { maxSpeed: 60,  minSpeed: 50,  tier: '王者',     badge: '⚡', rank: 'king' },
+  { maxSpeed: 70,  minSpeed: 60,  tier: '星耀',     badge: '💫', rank: 'star' },
+  { maxSpeed: 80,  minSpeed: 70,  tier: '钻石',     badge: '💎', rank: 'diamond' },
+  { maxSpeed: 110, minSpeed: 80,  tier: '铂金',     badge: '🪙', rank: 'platinum' },
+  { maxSpeed: 140, minSpeed: 110, tier: '黄金',     badge: '🥇', rank: 'gold' },
+  { maxSpeed: 180, minSpeed: 140, tier: '白银',     badge: '🥈', rank: 'silver' },
+  { maxSpeed: 999, minSpeed: 180, tier: '青铜',     badge: '🥉', rank: 'bronze' },
 ];
 
-const PB_TIERS = [
-  { maxSpeed: 65,  minSpeed: 0,   tier: '王者泳者', badge: '⚡', rank: 'king' },
-  { maxSpeed: 80,  minSpeed: 65,  tier: '钻石泳者', badge: '👑', rank: 'diamond' },
-];
-
-function getTier(avgSpeed, bestPB) {
+function getTier(bestPB) {
   if (bestPB != null && bestPB > 0) {
-    const pbTier = PB_TIERS.find(t => bestPB >= t.minSpeed && bestPB <= t.maxSpeed);
-    if (pbTier) return pbTier;
+    return ALL_TIERS.find(t => bestPB >= t.minSpeed && bestPB <= t.maxSpeed) || null;
   }
-  return AVG_TIERS.find(t => avgSpeed >= t.minSpeed && avgSpeed < t.maxSpeed) || null;
+  return null;
 }
 
 function formatPace(seconds) {
@@ -72,15 +71,20 @@ Page({
       today: now.getDate()
     });
     this.syncYouLongShow();
-    this.loadData();
-    this.loadUserStats();
     this.loadEncouragement();
+    this.runLoadSequence();
   },
 
   onShow() {
-    this.loadData();
-    this.loadUserStats();
+    this.runLoadSequence();
     this.loadEncouragement();
+  },
+
+  async runLoadSequence() {
+    await this.loadData();
+    await this.loadStrokeTiers();
+    this.loadProgression(this.data.strokeStats);
+    this.loadUserStats();
   },
 
   async loadData() {
@@ -221,7 +225,6 @@ Page({
     const specialTitle = (monthlyTotal > 45000 || monthMaxDistance > 12000) ? '毅力之星' : '';
 
     this.setData({ monthlyTotal, weeklyTotal, rankPercent, activeDays, weekDays, strokeStats, bestPaceFormatted, bestPaceEmoji, specialTitle });
-    this.loadProgression(strokeStats);
   },
 
   computeStrokeStats(records) {
@@ -261,15 +264,14 @@ Page({
         const avg = s.totalDistance > 0
           ? Math.round((s.totalDuration / (s.totalDistance / 100)) * 10) / 10
           : 0;
-        const bestPB = s.bestPace < Infinity ? Math.round(s.bestPace * 10) / 10 : null;
-        const tier = getTier(avg, bestPB);
+        const old = this.data.strokeStats.find(x => x.id === s.id) || {};
         return {
           ...s,
           avgSpeed100m: avg,
-          bestPB,
-          tier: tier ? tier.tier : '-',
-          badge: tier ? tier.badge : '',
-          rank: tier ? tier.rank : ''
+          bestPB: old.bestPB || null,
+          tier: old.tier || '-',
+          badge: old.badge || '',
+          rank: old.rank || ''
         };
       })
       .sort((a, b) => a.avgSpeed100m - b.avgSpeed100m);
@@ -282,8 +284,8 @@ Page({
     }
 
     const bestStroke = strokeStats[0];
-    const tier = getTier(bestStroke.avgSpeed100m, bestStroke.bestPB);
-    const isDiamond = (tier && (tier.rank === 'diamond' || tier.rank === 'king')) || this.data.specialTitle;
+    const tier = getTier(bestStroke.bestPB);
+    const isDiamond = (tier && (tier.rank === 'diamond' || tier.rank === 'star' || tier.rank === 'king' || tier.rank === 'king_glory')) || this.data.specialTitle;
     const userTierInfo = tier ? { stroke: bestStroke, tier: tier.tier, badge: tier.badge } : null;
 
     if (!isDiamond) {
@@ -367,7 +369,7 @@ Page({
     if (month === 1) { year--; month = 12; }
     else { month--; }
     this.setData({ year, month, checkedToday: false, todayDistance: 0 });
-    this.loadData();
+    this.runLoadSequence();
   },
 
   nextMonth() {
@@ -375,7 +377,7 @@ Page({
     if (month === 12) { year++; month = 1; }
     else { month++; }
     this.setData({ year, month, checkedToday: false, todayDistance: 0 });
-    this.loadData();
+    this.runLoadSequence();
   },
 
   goToToday() {
@@ -385,7 +387,7 @@ Page({
       month: now.getMonth() + 1,
       today: now.getDate()
     });
-    this.loadData();
+    this.runLoadSequence();
   },
 
   onDayTap(e) {
@@ -451,6 +453,7 @@ Page({
       });
       this.buildCalendar();
       this.computeStats();
+      await this.loadStrokeTiers();
       this.loadUserStats();
     } catch (e) {
       wx.showToast({ title: '保存失败', icon: 'none' });
@@ -509,5 +512,36 @@ Page({
     } catch (e) {
       console.warn('加载用户统计失败:', e);
     }
+  },
+
+  // 从全历史最佳配速计算泳姿段位（独立步骤，不依赖当月数据）
+  async loadStrokeTiers() {
+    try {
+      const result = await request.callFunction('getUserStats', {
+        year: 2026, month: 1, today: 1
+      }, { showLoad: false, showError: false });
+      const data = result?.data || result || {};
+      const perStroke = data.bestPacePerStroke || {};
+      const stats = this.data.strokeStats.map(s => {
+        const bestPB = perStroke[s.id];
+        const tier = getTier(bestPB);
+        return {
+          ...s,
+          bestPB: bestPB || null,
+          tier: tier ? tier.tier : '-',
+          badge: tier ? tier.badge : '',
+          rank: tier ? tier.rank : ''
+        };
+      });
+      this.setData({ strokeStats: stats });
+    } catch (e) {
+      console.warn('加载段位失败:', e);
+    }
+  },
+
+  loadEncouragement() {
+    const idx = (new Date().getDate() - 1) % encouragements.length;
+    this.setData({ encouragement: encouragements[idx] });
   }
+
 });

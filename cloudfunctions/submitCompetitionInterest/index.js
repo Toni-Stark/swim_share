@@ -59,21 +59,21 @@ exports.main = async (event, context) => {
       return m + ':' + String(s).padStart(2, '0');
     }
 
-    const AVG_TIERS = [
-      { maxSpeed: 120, minSpeed: 0,   tier: '铂金泳者', badge: '💎', rank: 'platinum' },
-      { maxSpeed: 150, minSpeed: 120, tier: '黄金泳者', badge: '🥇', rank: 'gold' },
-      { maxSpeed: 180, minSpeed: 150, tier: '白银泳者', badge: '🥈', rank: 'silver' },
-      { maxSpeed: 999, minSpeed: 180, tier: '青铜泳者', badge: '🥉', rank: 'bronze' },
-    ];
-    const PB_TIERS = [
-      { maxSpeed: 65,  minSpeed: 0,   tier: '王者泳者', badge: '⚡', rank: 'king' },
-      { maxSpeed: 80,  minSpeed: 65,  tier: '钻石泳者', badge: '👑', rank: 'diamond' },
+    const ALL_TIERS = [
+      { maxSpeed: 50,  minSpeed: 0,   tier: '荣耀王者', badge: '👑', rank: 'king_glory' },
+      { maxSpeed: 60,  minSpeed: 50,  tier: '王者',     badge: '⚡', rank: 'king' },
+      { maxSpeed: 70,  minSpeed: 60,  tier: '星耀',     badge: '💫', rank: 'star' },
+      { maxSpeed: 80,  minSpeed: 70,  tier: '钻石',     badge: '💎', rank: 'diamond' },
+      { maxSpeed: 110, minSpeed: 80,  tier: '铂金',     badge: '🪙', rank: 'platinum' },
+      { maxSpeed: 140, minSpeed: 110, tier: '黄金',     badge: '🥇', rank: 'gold' },
+      { maxSpeed: 180, minSpeed: 140, tier: '白银',     badge: '🥈', rank: 'silver' },
+      { maxSpeed: 999, minSpeed: 180, tier: '青铜',     badge: '🥉', rank: 'bronze' },
     ];
 
     let tierName = '';
     let tierBadge = '';
     if (bestPace < Infinity) {
-      const pbTier = PB_TIERS.find(t => bestPace >= t.minSpeed && bestPace <= t.maxSpeed);
+      const pbTier = ALL_TIERS.find(t => bestPace >= t.minSpeed && bestPace <= t.maxSpeed);
       if (pbTier) {
         tierName = pbTier.tier;
         tierBadge = pbTier.badge;

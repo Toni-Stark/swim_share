@@ -122,7 +122,6 @@
       </view>
     </view>
 
-    <view style="height: 140rpx;"></view>
 
   <!-- 视频播放区（scroll-view 外，避免原生组件冲突） -->
   <view class="video-section" wx:if="{{displayType === 'video' && video}}">
@@ -143,6 +142,7 @@
       <view class="va-btn remove" bindtap="deleteVideo">移除</view>
     </view>
   </view>
+  <view style="height: 140rpx;"></view>
 
   <!-- 保存栏 -->
   <view class="save-bar">

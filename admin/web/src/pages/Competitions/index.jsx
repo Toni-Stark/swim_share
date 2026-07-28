@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Card, Table, Button, Space, Modal, Form, Input, DatePicker, Select, Popconfirm, message, Tag, Descriptions } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Card, Table, Button, Space, Modal, Form, Input, DatePicker, Select, Popconfirm, message, Tag, Upload } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, UnorderedListOutlined, UploadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import compApi from '../../api/competitions';
+import uploadApi from '../../api/upload';
 
 export default function Competitions() {
   const [list, setList] = useState([]);
@@ -11,6 +12,8 @@ export default function Competitions() {
   const [editItem, setEditItem] = useState(null);
   const [regModal, setRegModal] = useState(false);
   const [registrations, setRegistrations] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
   const [form] = Form.useForm();
 
   const fetch = () => {
@@ -22,8 +25,33 @@ export default function Competitions() {
 
   useEffect(() => { fetch(); }, []);
 
-  const openCreate = () => { setEditItem(null); form.resetFields(); setModalOpen(true); };
-  const openEdit = (item) => { setEditItem(item); form.setFieldsValue({ ...item, date: dayjs(item.date) }); setModalOpen(true); };
+  const openCreate = () => { setEditItem(null); form.resetFields(); setPreviewUrl(''); setModalOpen(true); };
+  const openEdit = (item) => {
+    setEditItem(item);
+    form.setFieldsValue({ ...item, date: dayjs(item.date) });
+    setPreviewUrl(item.coverImage || '');
+    setModalOpen(true);
+  };
+
+  const handleUpload = async (file) => {
+    setUploading(true);
+    try {
+      const res = await uploadApi.uploadFile(file);
+      if (res.code === 0) {
+        const url = res.data.url;
+        form.setFieldsValue({ coverImage: url });
+        setPreviewUrl(url);
+        message.success('封面上传成功');
+      } else {
+        message.error(res.message || '上传失败');
+      }
+    } catch {
+      message.error('上传失败');
+    } finally {
+      setUploading(false);
+    }
+    return false;
+  };
 
   const onSave = async () => {
     const values = await form.validateFields();
@@ -59,6 +87,9 @@ export default function Competitions() {
 
   const columns = [
     { title: '名称', dataIndex: 'name', width: 200 },
+    { title: '封面', width: 80, render: (_, r) => r.coverImage ? (
+      <img src={r.coverImage} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} alt="" />
+    ) : <span style={{ color: '#ccc' }}>无</span> },
     { title: '日期', dataIndex: 'date', width: 120 },
     { title: '地点', dataIndex: 'location', width: 150, ellipsis: true },
     { title: '状态', dataIndex: 'status', width: 100,
@@ -109,7 +140,19 @@ export default function Competitions() {
           <Form.Item name="date" label="日期" rules={[{ required: true }]}><DatePicker style={{ width: '100%' }} /></Form.Item>
           <Form.Item name="location" label="地点" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="description" label="描述"><Input.TextArea rows={3} /></Form.Item>
-          <Form.Item name="coverImage" label="封面图 URL"><Input /></Form.Item>
+          <Form.Item name="coverImage" label="封面图">
+            <Input placeholder="上传后自动填入" readOnly style={{ marginBottom: 8 }} />
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              beforeUpload={handleUpload}
+            >
+              <Button icon={<UploadOutlined />} loading={uploading}>选择图片上传</Button>
+            </Upload>
+            {previewUrl && (
+              <img src={previewUrl} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', marginTop: 8, borderRadius: 6 }} alt="preview" />
+            )}
+          </Form.Item>
           <Form.Item name="status" label="状态" initialValue="upcoming">
             <Select options={[{ label: '进行中', value: 'upcoming' }, { label: '已结束', value: 'ended' }]} />
           </Form.Item>

@@ -40,7 +40,8 @@ exports.main = async (event, context) => {
 
     const enrichedList = list.map(item => ({
       ...item,
-      myRegStatus: regMap[item._id] || ''
+      myRegStatus: regMap[item._id] || '',
+      isCreator: item.createdBy === openid
     }));
 
     return {

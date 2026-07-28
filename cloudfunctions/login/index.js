@@ -61,6 +61,7 @@ exports.main = async (event, context) => {
           email: '',
           is_show: true, // 权限字段：控制是否显示评论/点赞/添加动态等功能
           isDiamond: false, // 钻石段位标记：由打卡数据变化时维护
+          role: 'user', // 用户角色：admin 管理员 / user 普通用户
           stats: {
             dynamicsCount: 0,
             followersCount: 0,

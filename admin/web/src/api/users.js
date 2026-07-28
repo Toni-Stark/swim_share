@@ -12,4 +12,8 @@ export function updateUser(openid, data) {
   return request.put(`/users/${openid}`, data);
 }
 
-export default { getUsers, getUserDetail, updateUser };
+export function deleteUser(openid) {
+  return request.delete(`/users/${openid}`);
+}
+
+export default { getUsers, getUserDetail, updateUser, deleteUser };

@@ -7,6 +7,7 @@ Page({
     dynamicsList: [],
     adsList: [],
     officialList: [],
+    compList: [],
     feedCards: [],
     dynamicsPage: 1,
     pageSize: 10,
@@ -103,18 +104,20 @@ Page({
     await Promise.all([
       this.loadDynamics(true),
       this.loadAds(),
-      this.loadOfficial()
+      this.loadOfficial(),
+      this.loadCompetitions()
     ]);
     this.mergeFeed();
   },
 
   mergeFeed() {
-    const { dynamicsList, adsList, officialList } = this.data;
+    const { dynamicsList, adsList, officialList, compList } = this.data;
     const cards = [];
 
     dynamicsList.forEach(d => cards.push({ ...d, cardType: 'dynamic', sortTime: d.createTime }));
     adsList.forEach(a => cards.push({ ...a, cardType: a.cardType || 'ad', sortTime: a.createTime }));
     officialList.forEach(o => cards.push({ ...o, cardType: 'official', sortTime: o.publishTime || o.createTime }));
+    compList.forEach(c => cards.push({ ...c, cardType: 'competition', sortTime: c.createTime }));
 
     cards.sort((a, b) => new Date(b.sortTime) - new Date(a.sortTime));
 
@@ -194,6 +197,29 @@ Page({
     }
   },
 
+  async loadCompetitions() {
+    if (!this.data.youLongShow) return;
+    try {
+      const result = await request.callFunction('getCompetitions', {}, { showLoad: false, showError: false });
+      const list = (result?.list || []).filter(c => c.status === 'upcoming');
+      const mapped = list.map(c => ({
+        _id: c._id,
+        cardType: 'competition',
+        title: c.name,
+        description: c.description || '',
+        coverUrl: c.coverImage || '',
+        date: c.date,
+        location: c.location,
+        registrantCount: c.registrantCount || 0,
+        isCreator: c.isCreator || false,
+        createTime: c.createTime || Date.now()
+      }));
+      this.setData({ compList: mapped });
+    } catch (e) {
+      console.warn('加载赛事失败:', e);
+    }
+  },
+
   goToPublish() {
     wx.navigateTo({ url: '/pages/publish/publish' });
   },
@@ -210,6 +236,11 @@ Page({
   onCardTap(e) {
     const id = e.currentTarget.dataset.id;
     if (id) wx.navigateTo({ url: `/pages/dynamic-detail/dynamic-detail?id=${id}` });
+  },
+
+  onCompTap(e) {
+    const id = e.currentTarget.dataset.id;
+    if (id) wx.navigateTo({ url: `/pages/competition-detail/competition-detail?id=${id}` });
   },
 
   onAdTap(e) {

@@ -9,6 +9,7 @@ import Competitions from './pages/Competitions';
 import CheckIns from './pages/CheckIns';
 import Content from './pages/Content';
 import TierStats from './pages/TierStats';
+import Honors from './pages/Honors';
 import GlobalConfig from './pages/GlobalConfig';
 
 function PrivateRoute({ children }) {
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="checkins" element={<CheckIns />} />
         <Route path="content" element={<Content />} />
         <Route path="tiers" element={<TierStats />} />
+        <Route path="honors" element={<Honors />} />
         <Route path="config" element={<GlobalConfig />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />

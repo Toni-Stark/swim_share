@@ -68,7 +68,7 @@
       </view>
     </block>
 
-    <block wx:if="{{isAdmin && competition.status === 'upcoming'}}">
+    <block wx:if="{{(isAdmin || isCreator) && competition.status === 'upcoming'}}">
       <view class="detail-divider"></view>
       <text class="section-title">📋 报名管理 ({{registrations.length}}人)</text>
 

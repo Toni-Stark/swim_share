@@ -25,7 +25,8 @@
     "pages/my-competitions/my-competitions",
     "pages/edit-dynamic/edit-dynamic",
     "pages/agreement/agreement",
-    "pages/privacy/privacy"
+    "pages/privacy/privacy",
+    "pages/honors-wall/honors-wall"
   ],
   "window": {
     "backgroundTextStyle": "light",

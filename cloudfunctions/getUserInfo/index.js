@@ -105,6 +105,21 @@ exports.main = async (event, context) => {
       }
     }
 
+    // 角色字段：存量用户缺失时从 adminOpenIds 回填
+    let role = userInfo.role;
+    if ((role === undefined || role === null) && !userId) {
+      try {
+        const configRes = await db.collection('global_config').doc('adminOpenIds').get();
+        const val = configRes.data && configRes.data.value;
+        const isAdmin = Array.isArray(val) ? val.includes(targetOpenid)
+          : (typeof val === 'string' && val === targetOpenid);
+        role = isAdmin ? 'admin' : 'user';
+        await db.collection('users').where({ _openid: targetOpenid }).update({ data: { role } });
+      } catch (e) {
+        role = 'user';
+      }
+    }
+
     // 统计用户的动态数
     const dynamicsWhere = {
       _openid: targetOpenid,
@@ -135,6 +150,7 @@ exports.main = async (event, context) => {
     const fullUserInfo = {
       ...userInfo,
       isDiamond: isDiamond === undefined ? false : isDiamond,
+      role: role === undefined ? 'user' : role,
       stats: {
         dynamicsCount: dynamicsCount.total,
         followersCount: followersCount.total,

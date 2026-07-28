@@ -6,12 +6,14 @@ import tierApi from '../../api/tiers';
 const { Title } = Typography;
 
 const TIER_COLORS = {
-  '王者泳者': '#eb2f96',
-  '钻石泳者': '#722ed1',
-  '铂金泳者': '#1890ff',
-  '黄金泳者': '#faad14',
-  '白银泳者': '#bfbfbf',
-  '青铜泳者': '#d48806'
+  '荣耀王者': '#eb2f96',
+  '王者': '#f5222d',
+  '星耀': '#722ed1',
+  '钻石': '#1890ff',
+  '铂金': '#13c2c2',
+  '黄金': '#faad14',
+  '白银': '#bfbfbf',
+  '青铜': '#d48806'
 };
 
 const STROKE_LABEL = { freestyle: '自由泳', breaststroke: '蛙泳', backstroke: '仰泳', butterfly: '蝶泳' };
@@ -34,7 +36,7 @@ export default function TierStats() {
   }, []);
 
   const entries = Object.entries(distribution).sort((a, b) => {
-    const order = ['王者泳者', '钻石泳者', '铂金泳者', '黄金泳者', '白银泳者', '青铜泳者', '暂无段位'];
+    const order = ['荣耀王者', '王者', '星耀', '钻石', '铂金', '黄金', '白银', '青铜', '暂无段位'];
     return order.indexOf(a[0]) - order.indexOf(b[0]);
   });
 
@@ -42,11 +44,14 @@ export default function TierStats() {
     { title: '昵称', dataIndex: 'nickName', width: 120 },
     { title: 'OpenID', dataIndex: 'openid', width: 200, ellipsis: true },
     { title: '泳姿', width: 80, render: (_, r) => STROKE_LABEL[r.stroke] || r.stroke },
-    { title: '最佳PB', dataIndex: 'bestPB', width: 100, render: (v) => `${v}s/100m` },
-    { title: '平均配速', dataIndex: 'avgSpeed', width: 100, render: (v) => `${v}s/100m` },
-    { title: '段位', dataIndex: 'tier', width: 100,
-      render: (v) => <Tag color={TIER_COLORS[v]}>{v}</Tag> },
-    { title: '徽章', dataIndex: 'badge', width: 60 }
+    { title: '最佳PB', dataIndex: 'bestPB', width: 100, render: (v) => v ? `${v}s/100m` : '-' },
+    { title: '平均配速', dataIndex: 'avgSpeed', width: 100, render: (v) => v ? `${v}s/100m` : '-' },
+    { title: '段位', width: 100,
+      render: (_, r) => {
+        const name = r.tier?.tier || r.tier;
+        return <Tag color={TIER_COLORS[name]}>{name}</Tag>;
+      } },
+    { title: '徽章', width: 60, render: (_, r) => r.tier?.badge || r.badge || '' }
   ];
 
   return (

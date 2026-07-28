@@ -30,7 +30,10 @@
             bind:delete="onDelete">
           </dynamic-item>
         </view>
-        <view wx:elif="{{item.cardType === 'ad' || item.cardType === 'competition'}}" bindtap="onAdTap" data-id="{{item._id}}">
+        <view wx:elif="{{item.cardType === 'competition'}}" bindtap="onCompTap" data-id="{{item._id}}">
+          <ad-card item="{{item}}" bind:share="onAdShare"></ad-card>
+        </view>
+        <view wx:elif="{{item.cardType === 'ad'}}" bindtap="onAdTap" data-id="{{item._id}}">
           <ad-card item="{{item}}" bind:share="onAdShare"></ad-card>
         </view>
         <view wx:elif="{{item.cardType === 'official'}}" bindtap="onOfficialTap" data-id="{{item._id}}">

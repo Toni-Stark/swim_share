@@ -3,24 +3,22 @@ const { getDb } = require('../cloudbase');
 
 const router = express.Router();
 
-const AVG_TIERS = [
-  { maxSpeed: 120, minSpeed: 0, tier: '铂金泳者', badge: '💎', rank: 'platinum' },
-  { maxSpeed: 150, minSpeed: 120, tier: '黄金泳者', badge: '🥇', rank: 'gold' },
-  { maxSpeed: 180, minSpeed: 150, tier: '白银泳者', badge: '🥈', rank: 'silver' },
-  { maxSpeed: 999, minSpeed: 180, tier: '青铜泳者', badge: '🥉', rank: 'bronze' }
+const ALL_TIERS = [
+  { maxSpeed: 50,  minSpeed: 0,   tier: '荣耀王者', badge: '👑', rank: 'king_glory' },
+  { maxSpeed: 60,  minSpeed: 50,  tier: '王者',     badge: '⚡', rank: 'king' },
+  { maxSpeed: 70,  minSpeed: 60,  tier: '星耀',     badge: '💫', rank: 'star' },
+  { maxSpeed: 80,  minSpeed: 70,  tier: '钻石',     badge: '💎', rank: 'diamond' },
+  { maxSpeed: 110, minSpeed: 80,  tier: '铂金',     badge: '🪙', rank: 'platinum' },
+  { maxSpeed: 140, minSpeed: 110, tier: '黄金',     badge: '🥇', rank: 'gold' },
+  { maxSpeed: 180, minSpeed: 140, tier: '白银',     badge: '🥈', rank: 'silver' },
+  { maxSpeed: 999, minSpeed: 180, tier: '青铜',     badge: '🥉', rank: 'bronze' },
 ];
 
-const PB_TIERS = [
-  { maxSpeed: 65, minSpeed: 0, tier: '王者泳者', badge: '⚡', rank: 'king' },
-  { maxSpeed: 80, minSpeed: 65, tier: '钻石泳者', badge: '👑', rank: 'diamond' }
-];
-
-function getTier(avgSpeed, bestPB) {
+function getTier(bestPB) {
   if (bestPB != null && bestPB > 0) {
-    const pbTier = PB_TIERS.find(t => bestPB >= t.minSpeed && bestPB <= t.maxSpeed);
-    if (pbTier) return pbTier;
+    return ALL_TIERS.find(t => bestPB >= t.minSpeed && bestPB <= t.maxSpeed) || null;
   }
-  return AVG_TIERS.find(t => avgSpeed >= t.minSpeed && avgSpeed < t.maxSpeed) || null;
+  return null;
 }
 
 // 计算所有用户段位（遍历打卡全量，按泳姿统计）
@@ -50,7 +48,7 @@ function computeAllUserTiers(checkIns) {
   Object.values(userStrokeMap).forEach(entry => {
     const avg = entry.totalDist > 0 ? Math.round((entry.totalDur / (entry.totalDist / 100)) * 10) / 10 : 0;
     const bestPB = entry.bestPace < Infinity ? Math.round(entry.bestPace * 10) / 10 : null;
-    const tier = getTier(avg, bestPB);
+    const tier = getTier(bestPB);
     if (!userBestMap[entry.openid]) {
       userBestMap[entry.openid] = { openid: entry.openid, bestStroke: entry.stroke, avgSpeed: avg, bestPB, tier };
     } else {
@@ -72,7 +70,7 @@ router.get('/', async (req, res) => {
     const userTiers = computeAllUserTiers(allChecks.data || []);
 
     const distribution = {};
-    const tierNames = ['王者泳者', '钻石泳者', '铂金泳者', '黄金泳者', '白银泳者', '青铜泳者'];
+    const tierNames = ['荣耀王者', '王者', '星耀', '钻石', '铂金', '黄金', '白银', '青铜'];
     tierNames.forEach(t => { distribution[t] = 0; });
     distribution['暂无段位'] = 0;
 
@@ -108,7 +106,7 @@ router.get('/diamond', async (req, res) => {
     const allChecks = await db.collection('check_ins').limit(5000).get();
     const userTiers = computeAllUserTiers(allChecks.data || []);
     const diamondList = userTiers.filter(item =>
-      item.tier && (item.tier.rank === 'diamond' || item.tier.rank === 'king')
+      item.tier && (item.tier.rank === 'diamond' || item.tier.rank === 'star' || item.tier.rank === 'king' || item.tier.rank === 'king_glory')
     );
 
     // 批量取昵称

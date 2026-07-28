@@ -10,6 +10,9 @@ router.get('/ads', async (req, res) => {
     const result = await db.collection('ads').orderBy('createTime', 'desc').limit(100).get();
     res.json({ code: 0, data: result.data || [] });
   } catch (err) {
+    if (err.message && err.message.includes('not exist')) {
+      return res.json({ code: 0, data: [] });
+    }
     console.error('查询广告失败:', err);
     res.json({ code: -1, message: '查询失败' });
   }
@@ -63,6 +66,9 @@ router.get('/official', async (req, res) => {
       .orderBy('publishTime', 'desc').limit(100).get();
     res.json({ code: 0, data: result.data || [] });
   } catch (err) {
+    if (err.message && err.message.includes('not exist')) {
+      return res.json({ code: 0, data: [] });
+    }
     console.error('查询官方内容失败:', err);
     res.json({ code: -1, message: '查询失败' });
   }

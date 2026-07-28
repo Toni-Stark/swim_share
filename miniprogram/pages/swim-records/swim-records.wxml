@@ -151,7 +151,7 @@
 
 <!-- 泳姿速度统计 -->
 <view class="stroke-stats-section" wx:if="{{strokeStats.length > 0}}">
-  <view class="section-title">🏊 泳姿百米速度</view>
+  <view class="section-title">🏊 泳姿最佳配速（全历史）</view>
   <view class="stroke-stats-list">
     <view
       class="stroke-stat-item"
@@ -164,7 +164,7 @@
         <text class="ssi-sessions">{{item.sessions}}次</text>
       </view>
       <view class="ssi-body">
-        <text class="ssi-speed">{{item.avgSpeed100m}}s/100m</text>
+        <text class="ssi-speed">{{item.bestPB || item.avgSpeed100m}}s/100m</text>
         <view class="ssi-tag" wx:if="{{item.tier}}" style="background: {{item.color}}22; color: {{item.color}}">
           {{item.badge}} {{item.tier}}
         </view>
